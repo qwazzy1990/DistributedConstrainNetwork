@@ -25,7 +25,6 @@ public class DcopAgt {
     ArrayList<double[][]> pseudoParentsMatrix;
     ArrayList<Integer> specialAncestroDomainSize;
 
-    String messageToSend;
 
     /**The mailbox of the agent. This is where it will keep its messags from its parent and childrn
      * There are 4 types of messages. "HALT", "COLLECT", "VALUE..." "WEIGHT..."
