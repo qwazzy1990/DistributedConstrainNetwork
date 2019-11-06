@@ -9,7 +9,7 @@ compile:
 	javac *.java
 
 run: compile
-	java PtreeDoc FileOne.txt f.agt
+	java PtreeDoc FileOne.txt
 
 clean:
 	rm *.class

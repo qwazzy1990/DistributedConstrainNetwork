@@ -66,9 +66,6 @@ public class Util
             }
         }
 
-        //for testing
-        for(int i = 0; i < agentNames.size(); i++)System.out.println(agentNames.get(i));
-
         String rootLine = a.get(a.size()-1);
         rootId = rootLine.charAt(rootLine.length() - 1);
         System.out.println(rootId);
@@ -110,7 +107,6 @@ public class Util
             String fileLine = x.readLine();
             while(fileLine != null)
             {
-                System.out.println(fileLine);
 
                 fileLines.add(fileLine);
 

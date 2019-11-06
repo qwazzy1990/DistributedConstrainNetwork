@@ -9,35 +9,27 @@ public class PtreeDoc
     public static void main(String args[])
     {
         File inFile = null;
-        File fileTwo = null;
         if(args.length > 0)
         {
             inFile = new File(args[0]);
-            fileTwo = new File(args[1]);
             System.out.println(args[0]);
-            System.out.println(args[1]);
         }
         else{
             System.out.println("No file has been given\n");
             return;
         }
 
+        //Process the first file which creates the agents and sets their id
         Util u = new Util();
         u.openFileOne(inFile);
         u.readFileOne();
         u.closeFile();
         ArrayList<DcopAgt> agents = new ArrayList();
         u.proccesFileOne(agents);
-        ArrayList <String> agentFile = u.processFileTwo(fileTwo);
-        for(int i = 0; i < agents.size(); i++)
-        {
-            if(agents.get(i).id == 'f')
-            {
-                processAgent(agents.get(i), agentFile, isRoot(agentFile), isLeaf(agentFile), hasPseudoParent(agentFile), hasSpecialAncestor(agentFile));
-                System.out.println(agents.get(i).toString());
-            }
-        }
-        
+
+        //Now for each agent, initialize it from its own file
+        processAgents(agents);
+    
     }
 
 
@@ -50,16 +42,16 @@ public class PtreeDoc
 
         char c = sa.get(0).charAt(0);
         agt.numChildren = Character.getNumericValue(c); 
-        System.out.println(agt.numChildren);
         if(agt.numChildren > 0)
         {
             for(int i = 1; i < agt.numChildren+1; i++)
             {
-                System.out.println(sa.get(i).charAt(0));
                 agt.children.add(sa.get(i).charAt(0));
             }
         }
 
+        System.out.printf("---NUM CHILDREN=%d--\n", agt.numChildren);
+       
         if(agt.numChildren > 0) agt.isLeaf = false;
         else agt.isLeaf = true;
     }
@@ -106,7 +98,6 @@ public class PtreeDoc
                 col++;
                 matrix[row][col] = Double.valueOf(sa.get(i));
             }
-            System.out.println(matrix[row][col]);
 
         }
 
@@ -126,7 +117,6 @@ public class PtreeDoc
         for(int i = 1; i < agt.numPseudoParents+1; i++)
         {
             agt.pseudoParents.add(temp.get(i).charAt(0));
-            System.out.println(agt.pseudoParents.get(c));
         }
 
         //get the domain size of the pseudo parent
@@ -161,39 +151,41 @@ public class PtreeDoc
 
 
     //processes an agent by calling the other processing files
-    static void processAgent(DcopAgt agt, ArrayList<String> agtFile, boolean isRoot, boolean isLeaf, boolean pseudoParent, boolean specialAncestor)
+    static void processAgent(DcopAgt agt, ArrayList<String> agtFile, boolean isRoot, boolean pseudoParent, boolean specialAncestor)
     {
         agt.domainSize = Character.getNumericValue(agtFile.get(1).charAt(0));
         if(isRoot)
         {
-            processChildren(agt, agtFile.get(agtFile.size()-1));
             agt.isRoot = true;
             return;
         }
-        if(isLeaf && pseudoParent)
+        if(pseudoParent && specialAncestor)
         {
+            processChildren(agt, agtFile.get(agtFile.size()-1));
+
             processParent(agt, agtFile, 2, 5);
             processPseudoParents(agt, agtFile, 6);
+            processSpecialAncestors(agt, agtFile, 7);
             return;
         }
-        if(isLeaf && specialAncestor)
+        if(pseudoParent == false && specialAncestor)
         {
+            processChildren(agt, agtFile.get(agtFile.size()-1));
+
             processParent(agt, agtFile, 2, 5);
             processSpecialAncestors(agt, agtFile, 7);
             return;
         }
-        if(isLeaf == false && pseudoParent)
+        if(pseudoParent && specialAncestor == false)
         {
             processParent(agt, agtFile, 2, 5);
             processPseudoParents(agt, agtFile, 6);
             processChildren(agt, agtFile.get(agtFile.size()-1));
             return;
         }
-        if(isLeaf == false && specialAncestor)
+        if(specialAncestor== false && pseudoParent == false)
         {
-            System.out.println("HERE\n");
             processParent(agt, agtFile, 2, 5);
-            processSpecialAncestors(agt, agtFile, 7);
             processChildren(agt, agtFile.get(agtFile.size()-1));
             return;
         }
@@ -212,8 +204,6 @@ public class PtreeDoc
     static boolean isLeaf(ArrayList<String> fileLines)
     {
         String s = fileLines.get(fileLines.size()-1);
-        System.out.println("CHECKING CHILDREN");
-        System.out.println(s);
         String[] temp = s.split("\\s+");
         if(temp[0].equals("0"))return true; 
         return false;
@@ -221,7 +211,10 @@ public class PtreeDoc
 
     static boolean hasPseudoParent(ArrayList<String> fileLines)
     {
+        System.out.println(fileLines.size());
+        if(fileLines.size() <= 6)return false;
         String s = fileLines.get(6);
+        
         if(s.charAt(0)=='0')return false;
         return true;
     }
@@ -233,13 +226,31 @@ public class PtreeDoc
             String s = fileLines.get(i);
             if(s.contains("special_ancestor"))
             {
-                System.out.println("special ancesor line");
-                System.out.println(s.charAt(0));
+                
                 if(s.charAt(0) == '0')return false;
                 return true;
             }
         }
         return false;
+    }
+
+
+    //process all the agents
+    static void processAgents(ArrayList <DcopAgt> agents)
+    {
+        Util u = new Util();
+        for(int i = 0; i < agents.size(); i++)
+        {
+            File agentFile = null;
+            String fileName = new String();
+            fileName += Character.toString(agents.get(i).id);
+            fileName+=".agt";
+            agentFile = new File(fileName);
+            ArrayList<String> agtFile = u.processFileTwo(agentFile);
+            processAgent(agents.get(i), agtFile, isRoot(agtFile), hasPseudoParent(agtFile), hasSpecialAncestor(agtFile));
+            System.out.println(agents.get(i).toString());
+            
+        }
     }
 
 }

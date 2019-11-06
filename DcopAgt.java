@@ -25,6 +25,14 @@ public class DcopAgt {
     ArrayList<double[][]> pseudoParentsMatrix;
     ArrayList<Integer> specialAncestroDomainSize;
 
+    String messageToSend;
+
+    /**The mailbox of the agent. This is where it will keep its messags from its parent and childrn
+     * There are 4 types of messages. "HALT", "COLLECT", "VALUE..." "WEIGHT..."
+     */
+
+    ArrayList<String> mailBox;
+
     public DcopAgt(char c) {
         this.isRoot = false;
         this.isLeaf = false;
@@ -42,20 +50,22 @@ public class DcopAgt {
 
         this.pseudoParentsMatrix = new ArrayList<double[][]>();
         this.specialAncestroDomainSize = new ArrayList<Integer>();
+
+        this.mailBox = new ArrayList<String>();
     }
 
-    // ToString method
+    // ToString methods
     public String toString()
     {
         return "Id: "+Character.toString(this.id) + "\n"
         +"Is Leaf: " + String.valueOf(this.isLeaf) + "\n" 
         +"Is root: "+ String.valueOf(this.isRoot)+"\n"
         +"Parent: "+parentToString()+"\n"
-        +"PseudoParents: "+ psedoParentsToString()+"\n"
+        +"PseudoParents: "+ pseudoParentsToString()+"\n"
         +"SpecialAncestors: "+ specialAncestorsToString()+"\n"
         +"Children: "+childrenToString()+"\n";
 
-    }
+    }//end toString
 
     public String parentToString() {
         if (this.isRoot == true) {
@@ -63,7 +73,7 @@ public class DcopAgt {
         } else {
             return Character.toString(this.parentId);
         }
-    }
+    }//end func
 
     public String childrenToString()
     {
@@ -71,17 +81,18 @@ public class DcopAgt {
 
         String s = new String();
 
+        System.out.println("NUMBER OF CHILDREN");
+        System.out.println(this.numChildren);
+
         for(int i = 0; i < this.children.size(); i++)
         {
             s+= " ";
             s+=Character.toString(this.children.get(i));
         }
         return s;
-    }
+    }//end func
 
-    
-
-    public String psedoParentsToString() {
+    public String pseudoParentsToString() {
         String s = new String();
         if (this.pseudoParents.size() == 0) {
             s += "HAS NO PSEUDO PARENTS";
@@ -93,7 +104,7 @@ public class DcopAgt {
             }
         }
         return s;
-    }
+    }//end func
 
     public String specialAncestorsToString() {
         String s = new String();
@@ -107,5 +118,20 @@ public class DcopAgt {
             }
         }
         return s;
-    }
+    }//end func
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
 }
