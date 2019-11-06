@@ -1,0 +1,12 @@
+l  agt_var
+2  var_dom_sz
+f  parent
+2  parent_dom_sz
+4  sz_of_constraint_on_(f,l)
+0.4 0.0 1.0 0.5 
+1  a  pseudo_parent
+   2  pseudo_parent_dom_sz
+4  sz_of_constraint_on_(a,l)
+0.0 0.3 0.6 1.0 
+0  no_special_ancestor
+0  no_child_agt

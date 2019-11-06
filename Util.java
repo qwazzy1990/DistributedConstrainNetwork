@@ -28,6 +28,7 @@ public class Util
         try{
             x = new BufferedReader(new FileReader(inFile));
         }catch(Exception e){
+            System.out.println(inFile);
             e.printStackTrace();
             return;
         }
@@ -88,7 +89,6 @@ public class Util
             {
                 agts.get(i).isRoot = true;
             }
-            System.out.println(agts.get(i).toString());
         }
     }
 
@@ -101,6 +101,33 @@ public class Util
             e.printStackTrace();
         }
     }
+
+    public ArrayList<String> processFileTwo(File inFile)
+    {
+        ArrayList<String> fileLines = new ArrayList<String>();
+        openFileOne(inFile);
+        try{
+            String fileLine = x.readLine();
+            while(fileLine != null)
+            {
+                System.out.println(fileLine);
+
+                fileLines.add(fileLine);
+
+                fileLine = x.readLine();
+            }
+
+
+        }catch(Exception e)
+        {
+            System.out.println("Cannot read the file");
+        }
+
+        closeFile();
+        return fileLines;
+    }
+
+
 
     
 }

@@ -1,0 +1,9 @@
+j  agt_var
+2  var_dom_sz
+e  parent
+2  parent_dom_sz
+4  sz_of_constraint_on_(e,j)
+0.0 0.3 0.6 1.0 
+0  no_pseudo_parent
+0  no_special_ancestor
+0  no_child_agt
