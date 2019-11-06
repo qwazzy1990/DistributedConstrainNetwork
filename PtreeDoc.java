@@ -28,7 +28,15 @@ public class PtreeDoc
         u.proccesFileOne(agents);
 
         //Now for each agent, initialize it from its own file
-        processAgents(agents);
+
+        Messenger messenger = new Messenger(agents);
+        processAgents(agents, messenger);
+
+        DcopAgt root = agents.get(0);
+        for(int i = 0; i < root.numChildren; i++)
+        {
+            root.sendTo(root.messenger, root.children.get(i), "Collect");
+        }
     
     }
 
@@ -151,11 +159,13 @@ public class PtreeDoc
 
 
     //processes an agent by calling the other processing files
-    static void processAgent(DcopAgt agt, ArrayList<String> agtFile, boolean isRoot, boolean pseudoParent, boolean specialAncestor)
+    static void processAgent(DcopAgt agt, ArrayList<String> agtFile, boolean isRoot, boolean pseudoParent, boolean specialAncestor, Messenger m)
     {
         agt.domainSize = Character.getNumericValue(agtFile.get(1).charAt(0));
+        agt.setMessenger(m);
         if(isRoot)
         {
+            processChildren(agt, agtFile.get(agtFile.size()-1));
             agt.isRoot = true;
             return;
         }
@@ -236,7 +246,7 @@ public class PtreeDoc
 
 
     //process all the agents
-    static void processAgents(ArrayList <DcopAgt> agents)
+    static void processAgents(ArrayList <DcopAgt> agents, Messenger m)
     {
         Util u = new Util();
         for(int i = 0; i < agents.size(); i++)
@@ -247,7 +257,7 @@ public class PtreeDoc
             fileName+=".agt";
             agentFile = new File(fileName);
             ArrayList<String> agtFile = u.processFileTwo(agentFile);
-            processAgent(agents.get(i), agtFile, isRoot(agtFile), hasPseudoParent(agtFile), hasSpecialAncestor(agtFile));
+            processAgent(agents.get(i), agtFile, isRoot(agtFile), hasPseudoParent(agtFile), hasSpecialAncestor(agtFile), m);
             System.out.println(agents.get(i).toString());
             
         }

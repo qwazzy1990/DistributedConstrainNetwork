@@ -25,6 +25,8 @@ public class DcopAgt {
     ArrayList<double[][]> pseudoParentsMatrix;
     ArrayList<Integer> specialAncestroDomainSize;
 
+    Messenger messenger;
+
 
     /**The mailbox of the agent. This is where it will keep its messags from its parent and childrn
      * There are 4 types of messages. "HALT", "COLLECT", "VALUE..." "WEIGHT..."
@@ -51,6 +53,9 @@ public class DcopAgt {
         this.specialAncestroDomainSize = new ArrayList<Integer>();
 
         this.mailBox = new ArrayList<String>();
+        this.messenger = new Messenger();
+
+    
     }
 
     // ToString methods
@@ -118,6 +123,48 @@ public class DcopAgt {
         }
         return s;
     }//end func
+
+    public void readMessage()
+    {
+        System.out.println("--READING MESSAGE--");
+        String msg = this.mailBox.get(this.mailBox.size()-1);
+
+        if(msg.contains("Collect") && this.isLeaf)
+        {
+            System.out.printf("Recieved Collect from parent %c\n", this.parentId);
+            this.messenger.sendMessage(this.parentId, "Halt");
+        }
+
+        if(msg.contains("Collect") && this.isLeaf == false)
+        {
+            for(int i = 0; i < this.numChildren; i++)
+            {
+                System.out.printf("Sending message Collect to child %c\n", this.children.get(i));
+                this.messenger.sendMessage(this.children.get(i), msg);
+            }
+        }
+
+        if(this.isRoot && msg.contains("Halt"))
+        {
+            System.out.println("Recieved halt message from child");
+        }
+        if(this.isRoot == false && msg.contains("Halt"))
+        {
+            System.out.printf("Sending halt message to parent %c\n", this.parentId);
+            this.messenger.sendMessage(this.parentId, "Halt");
+        }
+    
+    }
+
+    /**Setters */
+    public void setMessenger(Messenger m)
+    {
+        this.messenger = m;
+    }
+    public void sendTo(Messenger m, Character recipient, String message)
+    {
+        m.sendMessage(recipient, message);
+    }
 
 
     
