@@ -24,7 +24,7 @@ public class PtreeDoc
         u.openFileOne(inFile);
         u.readFileOne();
         u.closeFile();
-        ArrayList<DcopAgt> agents = new ArrayList();
+        ArrayList<DcopAgt> agents = new ArrayList<DcopAgt>();
         u.proccesFileOne(agents);
 
         //Now for each agent, initialize it from its own file
@@ -32,11 +32,11 @@ public class PtreeDoc
         Messenger messenger = new Messenger(agents);
         processAgents(agents, messenger);
 
-        DcopAgt root = agents.get(0);
-        for(int i = 0; i < root.numChildren; i++)
-        {
-            root.sendTo(root.messenger, root.children.get(i), "Collect");
-        }
+       messenger.startMessageProcessing(agents.get(0), "Collect");
+
+        
+        
+       
     
     }
 
@@ -46,7 +46,7 @@ public class PtreeDoc
     //set the agt to a leaf or not
     static void processChildren(DcopAgt agt, String fileLine)
     {
-        ArrayList<String> sa = new ArrayList(Arrays.asList(fileLine.split("\\s+")));
+        ArrayList<String> sa = new ArrayList<String>(Arrays.asList(fileLine.split("\\s+")));
 
         char c = sa.get(0).charAt(0);
         agt.numChildren = Character.getNumericValue(c); 
@@ -58,7 +58,6 @@ public class PtreeDoc
             }
         }
 
-        System.out.printf("---NUM CHILDREN=%d--\n", agt.numChildren);
        
         if(agt.numChildren > 0) agt.isLeaf = false;
         else agt.isLeaf = true;
@@ -73,16 +72,17 @@ public class PtreeDoc
         agt.neighborDomainSize = Character.getNumericValue(s.charAt(0));
         s = fileLines.get(end);
         //call process matrix
+        agt.parentMatrix = new double[agt.neighborDomainSize][agt.domainSize];
         processMatrix(agt.parentMatrix, s, agt.neighborDomainSize, agt.domainSize);
+        System.out.println(Arrays.deepToString(agt.parentMatrix));
     }
 
     static void processMatrix(double [][] matrix, String s, int neighborDomain, int agtDomain)
     {
         //split the string representing teh weight matrix based on spaces
-        ArrayList<String> sa = new ArrayList(Arrays.asList(s.split(" ")));
+        ArrayList<String> sa = new ArrayList<String>(Arrays.asList(s.split(" ")));
         //allocate the matrix to the correct number of rowsn and collumns. Rows is the nieghborDomains
         //size and collumns is the agents domain size
-        matrix = new double[neighborDomain][agtDomain];
 
         //set the role and col
         int row = -1;
@@ -109,6 +109,7 @@ public class PtreeDoc
 
         }
 
+
     }//end function
 
 
@@ -116,12 +117,11 @@ public class PtreeDoc
     {
         //Get the number of pseudo parents
         String s = fileLines.get(start);
-        ArrayList<String> temp = new ArrayList(Arrays.asList(s.split("\\s+")));
+        ArrayList<String> temp = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
         //get the numberof pseudo parents
         agt.numPseudoParents = Character.getNumericValue(temp.get(0).charAt(0));
 
         //for each pseduo parent, get its id
-        int c = 0;
         for(int i = 1; i < agt.numPseudoParents+1; i++)
         {
             agt.pseudoParents.add(temp.get(i).charAt(0));
@@ -129,7 +129,7 @@ public class PtreeDoc
 
         //get the domain size of the pseudo parent
         s = fileLines.get(start+1);
-        temp = new ArrayList(Arrays.asList(s.split("\\s+")));
+        temp = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
         agt.neighborDomainSize = Character.getNumericValue(temp.get(1).charAt(0));
 
         s = fileLines.get(start+3);
@@ -137,6 +137,7 @@ public class PtreeDoc
         {   
             double[][] tempMatrix = new double[agt.neighborDomainSize][agt.domainSize];
             processMatrix(tempMatrix, s, agt.neighborDomainSize, agt.domainSize);
+            agt.pseudoParentsMatrix.add(tempMatrix);
         }
 
 
@@ -147,7 +148,7 @@ public class PtreeDoc
     static void processSpecialAncestors(DcopAgt agt, ArrayList<String> fileLines, int start)
     {
         String s = fileLines.get(start);
-        ArrayList<String> temp = new ArrayList(Arrays.asList(s.split("\\s+")));
+        ArrayList<String> temp = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
         agt.numSpecialAncestors = Character.getNumericValue(temp.get(0).charAt(0));
         for(int i = 0; i < agt.numSpecialAncestors; i++)
         {
@@ -258,7 +259,6 @@ public class PtreeDoc
             agentFile = new File(fileName);
             ArrayList<String> agtFile = u.processFileTwo(agentFile);
             processAgent(agents.get(i), agtFile, isRoot(agtFile), hasPseudoParent(agtFile), hasSpecialAncestor(agtFile), m);
-            System.out.println(agents.get(i).toString());
             
         }
     }

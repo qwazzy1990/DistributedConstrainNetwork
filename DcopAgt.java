@@ -25,6 +25,8 @@ public class DcopAgt {
     ArrayList<double[][]> pseudoParentsMatrix;
     ArrayList<Integer> specialAncestroDomainSize;
 
+    ArrayList<String> childWeightMessages;
+
     Messenger messenger;
 
 
@@ -51,6 +53,8 @@ public class DcopAgt {
 
         this.pseudoParentsMatrix = new ArrayList<double[][]>();
         this.specialAncestroDomainSize = new ArrayList<Integer>();
+        this.childWeightMessages = new ArrayList<String>();
+
 
         this.mailBox = new ArrayList<String>();
         this.messenger = new Messenger();
@@ -67,7 +71,8 @@ public class DcopAgt {
         +"Parent: "+parentToString()+"\n"
         +"PseudoParents: "+ pseudoParentsToString()+"\n"
         +"SpecialAncestors: "+ specialAncestorsToString()+"\n"
-        +"Children: "+childrenToString()+"\n";
+        +"Children: "+childrenToString()+"\n"
+        +"Parent Matrix: "+matrixToString()+"\n";
 
     }//end toString
 
@@ -79,14 +84,27 @@ public class DcopAgt {
         }
     }//end func
 
+    public String matrixToString()
+    {
+        String s = new String();
+
+        if(this.isRoot)return "HAS NO MATRIX";
+        s+=Arrays.deepToString(this.parentMatrix);
+        s+="\n";
+        for(int i = 0; i < this.numPseudoParents; i++)
+        {
+            s+=(this.pseudoParents.get(i).toString());
+            s+="\n";
+        }
+        return s;
+    }
+
     public String childrenToString()
     {
         if(this.isLeaf)return "HAS NO CHILDREN";
 
         String s = new String();
 
-        System.out.println("NUMBER OF CHILDREN");
-        System.out.println(this.numChildren);
 
         for(int i = 0; i < this.children.size(); i++)
         {
@@ -161,10 +179,48 @@ public class DcopAgt {
     {
         this.messenger = m;
     }
-    public void sendTo(Messenger m, Character recipient, String message)
-    {
-        m.sendMessage(recipient, message);
-    }
+   
+   public String processWeights(String msg)
+   {
+       String result = new String();
+       result+="";
+       DcopAgt parent = this.messenger.getAgent(this.parentId);
+       if(this.isLeaf)
+       {
+           result+= Double.toString(max(this.parentMatrix[0][0], this.parentMatrix[0][1]));
+           result += " ";
+           result += Double.toString(max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
+           result+="";
+           parent.childWeightMessages.add(result);
+           parent.processWeights(parent.childWeightMessages.get(0));
+           return result;
+       }
+       else 
+       {
+           this.weightToDouble(this.childWeightMessages.get(0));
+       }
+
+
+       return result;
+       
+   }
+
+   public double[] weightToDouble(String s)
+   {
+       double[] weights = new double[2];
+
+       ArrayList<String> sa = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
+
+       System.out.printf("%s %s\n", sa.get(0), sa.get(1));
+
+       return weights;
+   }
+
+   public double max(double a, double b)
+   {
+       if( a > b)return a;
+       else return b;
+   }
 
 
     
