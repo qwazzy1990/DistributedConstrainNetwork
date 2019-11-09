@@ -3,7 +3,10 @@ z  agt_var
 y  parent
 2  parent_dom_sz
 4  sz_of_constraint_on_(y,z)
-0.2 0.0 1.0 0.8 
-0  no_pseudo_parent
+0.2 0.1 1.0 0.8 
+1  x  pseudo_parent
+   2  pseudo_parent_dom_sz
+4  sz_of_constraint_on_(x,z)
+0.3 0.5 0.9 0.6 
 0  no_special_ancestor
 0  no_child_agt

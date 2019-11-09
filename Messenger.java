@@ -56,12 +56,13 @@ public class Messenger
     public void sendCollect(Character recipientID, Character senderId, String message)
     {
         DcopAgt recipient = this.getAgent(recipientID);
-        System.out.printf("\nAgent %c recieved Collect message from %c\n", recipientID, senderId);
+        System.out.printf("\nAgent %c got Agent %c msg: COLLECT\n", recipientID, senderId);
 
         if(recipient.isLeaf == true)
         {
-           System.out.printf("\nAt  leaf, terminating collect message transfer\n");
-           System.out.printf("\nBeginning weight transfer protocol\n");
+          // System.out.printf("\nAt  leaf, terminating collect message transfer\n");
+           //System.out.printf("\nBeginning weight transfer protocol\n");
+
            //if at the leaf then the recipeint of the weight message is the recipient's parent
            this.sendWeight(recipient.parentId, recipient.id, "Weight");
 
@@ -94,30 +95,30 @@ public class Messenger
     {
         DcopAgt recipient = this.getAgent(recipientID);
         DcopAgt sender = this.getAgent(senderID);
+        System.out.printf("\nAg %c got Ag %c msg: Weight %d %c %d %d %d %s", recipientID, senderID, 1, sender.parentId, sender.domainSize, recipient.domainSize, sender.domainSize*recipient.domainSize, sender.matrixToString());
+        System.out.printf(" Func to Sum: %s", sender.matrixToString());
+        System.out.printf(" Ag %c weight sum on %c %c is %s", sender.id, recipient.id, sender.id, sender.matrixToString());
+        String s = sender.processWeights(null);
+
+        System.out.printf(" Ag %c maxout on %c (max out %c): %s\n", sender.id, recipient.id, sender.id, sender.maxToString());
+
         if(recipient.isRoot == true)
         {
-            String s = sender.processWeights(null);
-            System.out.printf("%c is sending weight %s tp %c\n", senderID, s, recipientID);
 
 
+            //System.out.println("At the root. Begin transfer of values");
             for(int i = 0; i < recipient.childWeightMessages.size(); i++)
             {
-                System.out.printf("%s ", recipient.childWeightMessages.get(i));
-            }
-            System.out.printf("\n");
-            System.out.println("At the root. Begin transfer of values");
-            
-            for(int i = 0; i < recipient.numChildren; i++)
-            {
                 String childMsg = recipient.childWeightMessages.get(i);
+
+                System.out.printf("\nAg %c sets value:    %c=%d\n", recipient.id, recipient.id, recipient.sendValue(childMsg));
+
                 this.sendValue(recipient.children.get(i), recipient.id, Integer.toString(recipient.sendValue(childMsg)));
             }
 
         }
         else 
         {
-            String s = sender.processWeights(null);
-            System.out.printf("%c is sending weight %s tp %c\n", senderID, s, recipientID);
             this.sendWeight(recipient.parentId, recipient.id,"Weight");
         }
         
@@ -126,26 +127,31 @@ public class Messenger
     public void sendValue(Character recipientID, Character senderID, String message)
     {
        DcopAgt recipient = this.getAgent(recipientID);
-       DcopAgt sender = this.getAgent(senderID);
+       //DcopAgt sender = this.getAgent(senderID);
+       int myVal;
+       int parentsValue = Integer.valueOf(message);
+       double v0 = recipient.parentMatrix[parentsValue][0];
+       double v1 = recipient.parentMatrix[parentsValue][1];
 
-       System.out.printf("Agent %c recived %s from agent %c\n", recipientID, message, senderID);
+
+       if(recipient.max(v0, v1) == v0)myVal = 0;
+       else myVal = 1;
+
+
+
+       System.out.printf("\nAgent %c got %s from agent %c:\n  %c sets value:  %c = %d\n", recipientID, message, senderID, recipientID, recipientID, myVal);
 
        if(recipient.isLeaf)
        {
            //calculate whcih value you will send
            //return halt
-           System.out.println("At the leaf, sending halt msge");
-           System.out.printf("Agent %c's value is %s\n", recipientID, "0");
+           System.out.printf("\nAgent %c's value is %s\n", recipientID, Integer.toString(myVal));
+
+           //System.out.println("At the leaf, begin halt message transfer protocol");
+           this.sendHalt(recipient.parentId, recipient.id, "halt");
            return;
        }
-       int parentsValue = Integer.valueOf(message);
-       double v0 = recipient.parentMatrix[parentsValue][0];
-       double v1 = recipient.parentMatrix[parentsValue][1];
-
-       int myVal;
-
-       if(recipient.max(v0, v1) == v0)myVal = 0;
-       else myVal = 1;
+      
 
        for(int i = 0; i < recipient.numChildren; i++)
        {
@@ -159,17 +165,17 @@ public class Messenger
 
         DcopAgt recipient = this.getAgent(recipientID);
         DcopAgt sender = this.getAgent(senderID);
-        System.out.printf("\nAgent %c recieved Halt message from agent %c\n", recipient.id, sender.id);
+        System.out.printf("\nAgent %c got Agent %c msg: Halt\n", recipient.id, sender.id);
+        System.out.printf(" Agent %c halts\n", recipient.id);
 
         if(recipient.isRoot)
         {
-            System.out.printf("\nAt the root, terminating halt message transfer\n");
+            //System.out.printf("\nAt the root, terminating halt message transfer\n");
             return;
         }
         else
         {
            
-            System.out.printf("\nAgent %c is sending Halt message to Agent %c\n", recipientID, recipient.parentId);
             this.sendHalt(recipient.parentId, recipientID, "Halt");
             
         } 

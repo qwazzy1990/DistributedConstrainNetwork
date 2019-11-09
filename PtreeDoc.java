@@ -12,7 +12,8 @@ public class PtreeDoc
         if(args.length > 0)
         {
             inFile = new File(args[0]);
-            System.out.println(args[0]);
+            System.out.printf("Load..%s", args[0]);
+
         }
         else{
             System.out.println("No file has been given\n");

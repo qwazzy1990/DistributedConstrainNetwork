@@ -72,7 +72,7 @@ public class DcopAgt {
         +"PseudoParents: "+ pseudoParentsToString()+"\n"
         +"SpecialAncestors: "+ specialAncestorsToString()+"\n"
         +"Children: "+childrenToString()+"\n"
-        +"Parent Matrix: "+matrixToString()+"\n";
+        +"Parents Matrix:\n"+matrixToString()+"\n";
 
     }//end toString
 
@@ -89,13 +89,15 @@ public class DcopAgt {
         String s = new String();
 
         if(this.isRoot)return "HAS NO MATRIX";
+        
         s+=Arrays.deepToString(this.parentMatrix);
-        s+="\n";
+        
         for(int i = 0; i < this.numPseudoParents; i++)
         {
-            s+=(this.pseudoParents.get(i).toString());
-            s+="\n";
+            s+=",";
+            s+= Arrays.deepToString(this.pseudoParentsMatrix.get(i));
         }
+        s+="\n";
         return s;
     }
 
@@ -187,6 +189,7 @@ public class DcopAgt {
        DcopAgt parent = this.messenger.getAgent(this.parentId);
        if(this.isLeaf)
        {
+           this.sumParentConstraints();
            result = weightMatrixToMessage(max(this.parentMatrix[0][0], this.parentMatrix[0][1]), max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
            parent.childWeightMessages.add(result);
            return result;
@@ -200,6 +203,16 @@ public class DcopAgt {
            this.parentMatrix[1][1] += childWeights[1];
 
            result = weightMatrixToMessage(max(this.parentMatrix[0][0], this.parentMatrix[0][1]), max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
+            if(parent.childWeightMessages.size() >= parent.numChildren)
+            {
+                int count = 0;
+
+                while(parent.childWeightMessages.size() >= parent.numChildren)
+                {
+                    parent.childWeightMessages.remove(count);
+                    count++;
+                }
+            }
            parent.childWeightMessages.add(result);
         
 
@@ -216,7 +229,6 @@ public class DcopAgt {
 
        ArrayList<String> sa = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
 
-       System.out.printf("%s %s\n", sa.get(0), sa.get(1));
        
        weights[0] = Double.valueOf(sa.get(0));
        weights[1] = Double.valueOf(sa.get(1));
@@ -252,6 +264,44 @@ public class DcopAgt {
        else return b;
    }
 
+
+   public void sumParentConstraints()
+   {
+       int row = 0;
+       int col = 0; 
+       for(int i = 0; i < this.numPseudoParents; i++)
+       {
+            double[][] matrix = this.pseudoParentsMatrix.get(i);
+            for(int j = 0; j < matrix.length; j++)
+            {
+                for(int k = 0; k < matrix[0].length; k++)
+                {
+                    this.parentMatrix[row][col] += matrix[j][k];
+                    col++;
+                }
+                col = 0;
+                row++;
+            }
+       }
+   }
+
+   public String maxToString()
+   {
+       String s = new String();
+       double max1 = this.max(this.parentMatrix[0][0], this.parentMatrix[0][1]);
+       double max2 = this.max(this.parentMatrix[1][0], this.parentMatrix[1][1]);
+       s+="[";
+       s+= Double.toString(max1);
+       s+=",";
+       s+=Double.toString(max2);
+       s+="]";
+
+
+
+       
+
+       return s;
+   }
 
     
 

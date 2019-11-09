@@ -1,3 +1,0 @@
-4  #_of_agts
-w x y z 
-root_agt w
