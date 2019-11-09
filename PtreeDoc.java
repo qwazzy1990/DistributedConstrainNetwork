@@ -74,7 +74,6 @@ public class PtreeDoc
         //call process matrix
         agt.parentMatrix = new double[agt.neighborDomainSize][agt.domainSize];
         processMatrix(agt.parentMatrix, s, agt.neighborDomainSize, agt.domainSize);
-        System.out.println(Arrays.deepToString(agt.parentMatrix));
     }
 
     static void processMatrix(double [][] matrix, String s, int neighborDomain, int agtDomain)
@@ -222,7 +221,6 @@ public class PtreeDoc
 
     static boolean hasPseudoParent(ArrayList<String> fileLines)
     {
-        System.out.println(fileLines.size());
         if(fileLines.size() <= 6)return false;
         String s = fileLines.get(6);
         
@@ -259,6 +257,7 @@ public class PtreeDoc
             agentFile = new File(fileName);
             ArrayList<String> agtFile = u.processFileTwo(agentFile);
             processAgent(agents.get(i), agtFile, isRoot(agtFile), hasPseudoParent(agtFile), hasSpecialAncestor(agtFile), m);
+            System.out.println(agents.get(i).toString());
             
         }
     }

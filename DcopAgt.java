@@ -187,17 +187,22 @@ public class DcopAgt {
        DcopAgt parent = this.messenger.getAgent(this.parentId);
        if(this.isLeaf)
        {
-           result+= Double.toString(max(this.parentMatrix[0][0], this.parentMatrix[0][1]));
-           result += " ";
-           result += Double.toString(max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
-           result+="";
+           result = weightMatrixToMessage(max(this.parentMatrix[0][0], this.parentMatrix[0][1]), max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
            parent.childWeightMessages.add(result);
-           parent.processWeights(parent.childWeightMessages.get(0));
            return result;
        }
        else 
        {
-           this.weightToDouble(this.childWeightMessages.get(0));
+           double[] childWeights = this.weightToDouble(this.childWeightMessages.get(0));
+           this.parentMatrix[0][0] += childWeights[0];
+           this.parentMatrix[0][1] += childWeights[1];
+           this.parentMatrix[1][0] += childWeights[0];
+           this.parentMatrix[1][1] += childWeights[1];
+
+           result = weightMatrixToMessage(max(this.parentMatrix[0][0], this.parentMatrix[0][1]), max(this.parentMatrix[1][0], this.parentMatrix[1][1]));
+           parent.childWeightMessages.add(result);
+        
+
        }
 
 
@@ -212,8 +217,33 @@ public class DcopAgt {
        ArrayList<String> sa = new ArrayList<String>(Arrays.asList(s.split("\\s+")));
 
        System.out.printf("%s %s\n", sa.get(0), sa.get(1));
+       
+       weights[0] = Double.valueOf(sa.get(0));
+       weights[1] = Double.valueOf(sa.get(1));
 
        return weights;
+   }
+
+   //used only for the root when it gets a weight message from its child
+   public int sendValue(String s)
+   {
+        double[] weights = this.weightToDouble(s);
+        if(weights[0] > weights[1]) return 0;
+        else return 1;
+
+   }
+
+   public String weightMatrixToMessage(double first, double second)
+   {
+       String s = new String();
+       
+       s ="";
+       s += Double.toString(first);
+       s+= " ";
+       s+= Double.toString(second);
+
+
+       return s;
    }
 
    public double max(double a, double b)
